@@ -1,3 +1,59 @@
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+
+// const CommentSection = ({ complaintId }) => {
+//   const [comments, setComments] = useState([]);
+//   const [text, setText] = useState("");
+
+//   const fetchComments = async () => {
+//     const res = await axios.get(`http://localhost:1000/comment/${complaintId}`);
+//     setComments(res.data);
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     await axios.post(`http://localhost:1000/comment/${complaintId}`, { text }, {
+//       headers: {
+//   authorization: `Bearer ${localStorage.getItem("token")}`,
+// },
+
+//     });
+//     setText("");
+//     fetchComments();
+//   };
+
+//   useEffect(() => {
+//     fetchComments();
+//   }, [complaintId]);
+
+//   return (
+//     <div className="my-4">
+//       <h3 className="text-lg font-semibold">Comments</h3>
+
+//       <form onSubmit={handleSubmit} className="flex gap-2 my-2">
+//         <input
+//           type="text"
+//           value={text}
+//           onChange={e => setText(e.target.value)}
+//           placeholder="Add a comment"
+//           className="border p-2 flex-1"
+//         />
+//         <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded">Post</button>
+//       </form>
+
+//       {comments.map(comment => (
+//         <div key={comment._id} className="border-b py-2">
+//           <strong>{comment.user.username}:</strong> {comment.text}
+//           <div className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</div>
+//         </div>
+//       ))}
+//     </div>
+//   );
+// };
+
+// export default CommentSection;
+
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -5,21 +61,35 @@ const CommentSection = ({ complaintId }) => {
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
 
+  // Get backend URL from environment variable
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const fetchComments = async () => {
-    const res = await axios.get(`http://localhost:1000/comment/${complaintId}`);
-    setComments(res.data);
+    try {
+      const res = await axios.get(`${backendUrl}/comment/${complaintId}`);
+      setComments(res.data);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post(`http://localhost:1000/comment/${complaintId}`, { text }, {
-      headers: {
-  authorization: `Bearer ${localStorage.getItem("token")}`,
-},
-
-    });
-    setText("");
-    fetchComments();
+    try {
+      await axios.post(
+        `${backendUrl}/comment/${complaintId}`,
+        { text },
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setText("");
+      fetchComments();
+    } catch (error) {
+      console.error("Error posting comment:", error);
+    }
   };
 
   useEffect(() => {
@@ -34,17 +104,24 @@ const CommentSection = ({ complaintId }) => {
         <input
           type="text"
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={(e) => setText(e.target.value)}
           placeholder="Add a comment"
           className="border p-2 flex-1"
         />
-        <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded">Post</button>
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-3 py-1 rounded"
+        >
+          Post
+        </button>
       </form>
 
-      {comments.map(comment => (
+      {comments.map((comment) => (
         <div key={comment._id} className="border-b py-2">
           <strong>{comment.user.username}:</strong> {comment.text}
-          <div className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</div>
+          <div className="text-xs text-gray-500">
+            {new Date(comment.createdAt).toLocaleString()}
+          </div>
         </div>
       ))}
     </div>
@@ -52,5 +129,3 @@ const CommentSection = ({ complaintId }) => {
 };
 
 export default CommentSection;
-
-
